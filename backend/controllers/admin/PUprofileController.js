@@ -56,7 +56,7 @@ const getallPUprofile = asyncHandler(async(req,res)=>{
       
     const configPUbrokerLimit = parseInt(AssignBrolerLimit.value)
 
-    let query = {status:'New',$expr: {
+    let query = {status:'New',planID: {"$exists": true},$expr: {
         $lt: [{ $size: "$brokerID" }, configPUbrokerLimit]
       }};
 

@@ -393,6 +393,8 @@ const newMarriageProfile = new MarriageProfile({
   brokerId: _brokerId,
   publicProfId: publicUser._id,
   profileID: maxProfileId,
+  isPublicImage:true,
+  isPublicProfile:true
 });
 
     if (
