@@ -917,12 +917,30 @@ const getBrokImageUrl = async (req, res) => {
                 Expiry: expiryDate
             }
         };
-        let _broker = await Broker.findById({ _id: brokerId });
-        const token = blobService.generateSharedAccessSignature(_broker.container, blobName, sharedAccessPolicy);
-        let sasUrl = blobService.getUrl(_broker.container, _broker.imageName, token);
-        res.send({ "isSuccess": true, "message": "success", "data": sasUrl })
+        const  _broker = await Broker.findById({ _id: brokerId });
 
-        res.send({ "isSuccess": false, "message": "failed", "data": [] })
+
+         if (_broker && _broker.imageName && _broker.imageName.length > 0){
+           
+            const blobName = _broker.imageName
+                const token = blobService.generateSharedAccessSignature(_broker.container.toLowerCase(), blobName, sharedAccessPolicy);
+                const blobResponse = await getImageByContainerAndBlob(_broker.container.toLowerCase(), blobName, token);
+
+                 if (!blobResponse || !blobResponse.readableStreamBody) {
+                    return { profileID: doc.profileID, imageBase64: null };
+                }
+
+                 let imageToShow;
+                 imageToShow = blobResponse.readableStreamBody.pipe(sharp())
+
+                 const imageBuffer = await streamToBuffer(imageToShow);
+
+                 const base64Image = `data:image/jpeg;base64,${imageBuffer.toString('base64')}`;
+
+            
+             res.send({ "isSuccess": true, "message": "success", "data": base64Image })
+         }
+
     }
     catch (err) {
 
@@ -1715,6 +1733,64 @@ const PUImageMovedToBrokContainer = async (sourceContainer, destContainer, image
 };
 
 
+const brokerImageUrl = async (req, res) => {
+    try {
+
+        const user = await User.findById(req.user.id)
+
+        if (!user) {
+            res.status(401)
+            throw new Error('User not found')
+        }
+
+        const startDate = new Date();
+        const expiryDate = new Date(startDate);
+        expiryDate.setMinutes(startDate.getMinutes() + 100);
+        startDate.setMinutes(startDate.getMinutes() - 100);
+
+        const sharedAccessPolicy = {
+            AccessPolicy: {
+                Permissions: azureStorage.BlobUtilities.SharedAccessPermissions.READ,
+                Start: startDate,
+                Expiry: expiryDate
+            }
+        };
+        const  _broker = await Broker.findOne({ userId: user._id });
+
+        if(_broker.isPublicImage !== true){
+            return
+        }
+
+
+         if (_broker && _broker.imageName && _broker.imageName.length > 0){
+           
+            const blobName = _broker.imageName
+                const token = blobService.generateSharedAccessSignature(_broker.container.toLowerCase(), blobName, sharedAccessPolicy);
+                const blobResponse = await getImageByContainerAndBlob(_broker.container.toLowerCase(), blobName, token);
+
+                 if (!blobResponse || !blobResponse.readableStreamBody) {
+                    return { profileID: doc.profileID, imageBase64: null };
+                }
+
+                 let imageToShow;
+                 imageToShow = blobResponse.readableStreamBody.pipe(sharp())
+
+                 const imageBuffer = await streamToBuffer(imageToShow);
+
+                 const base64Image = `data:image/jpeg;base64,${imageBuffer.toString('base64')}`;
+
+            
+             res.send({ "isSuccess": true, "message": "success", "data": base64Image })
+         }
+
+    }
+    catch (err) {
+
+        errorfunction.errorHandler(err, req, res)
+    }
+}
+
+
 
 module.exports = {
     multerFile,
@@ -1737,5 +1813,6 @@ module.exports = {
     PURemoveProfileImage,
     PUProfileImageUrl,
     getBrokerProfileImageUrl,
-    PUImageMovedToBrokContainer
+    PUImageMovedToBrokContainer,
+    brokerImageUrl
 }

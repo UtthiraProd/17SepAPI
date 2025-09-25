@@ -7,7 +7,7 @@ const{adminRegisterBroker,adminUpdateBroker,adminDeleteBroker,adminGetBrokerByID
     getallBrokerName,AsignBroker,
     adminAssignBrokertoPublic,
     getBrokertoBroker,
-    adminAssignBrokertoBroker}=require('../../controllers/admin/adminBrokerController')
+    adminAssignBrokertoBroker,brokerImageAllowPU}=require('../../controllers/admin/adminBrokerController')
 
 
 const {protect} = require('../../middleware/authMiddleware')
@@ -29,6 +29,7 @@ router.route('/AsignBroker').post(protect,levelTwoRateLimit,AsignBroker)
 router.route('/BrokertoPublic').post(protect,levelTwoRateLimit,adminAssignBrokertoPublic) 
 router.route('/getBrokertoBroker').post(protect,levelOneRateLimit,getBrokertoBroker) 
 router.route('/AssignBrokertoBroker').post(protect,levelOneRateLimit,adminAssignBrokertoBroker) 
+router.route('/brokerImageAllowPU').post(protect,brokerImageAllowPU)
 
 
 

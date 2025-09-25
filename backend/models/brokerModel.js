@@ -116,6 +116,9 @@ const brokerSchema = mongoose.Schema({
       isActive:{
         type:Boolean
     },
+        isPublicImage:{
+        type:Boolean
+    },
     brokerTobroker:[
         {
             _id:{type: mongoose.Schema.Types.ObjectId }

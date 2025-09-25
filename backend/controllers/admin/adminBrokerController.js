@@ -110,7 +110,8 @@ const adminRegisterBroker = asyncHandler(async (req, res, next) => {
                 createdAt: new Date(),
                 updatedAt: new Date(),
                 isPublic:false,
-                isActive:true
+                isActive:true,
+                isPublicImage:true
             })
             if (_broker) {
                 return res.status(200).json({ isSuccess: true, message: "Broker Created Successfully", brokerId: _broker._id })
@@ -783,6 +784,42 @@ let Brok = brokers.brokerTobroker.some(b => b._id.toString() === brokID);
  }
 })
 
+const brokerImageAllowPU =asyncHandler(async(req,res)=>{
+     
+     try{
+
+        const user = await User.findById(req.user.id);
+        
+        if (!user) {
+             res.status(401).json({ isSuccess: false, message: 'User not found' });
+             return;
+         }
+        else if(user.isLoggedin !== true)
+          {
+            res.status(404)
+            throw new Error('User not logged in')
+         } 
+
+        const _userRole = await UserRole.findOne({ _id: user.roleId })
+
+         if (_userRole.name !== userBrokerRole) {
+              res.status(404)
+              throw new error("error")
+        }
+
+        const {brokerId, isPublicImage }=req.body
+
+        // const _brokerId = await Broker.findOne({_id:profileId})
+
+
+          await Broker.updateOne({ _id: brokerId }, { $set: { isPublicImage: isPublicImage  } })
+
+     }
+      catch (err) {
+        errorfunction.errorHandler(err, req, res)
+    }
+})
+
 
 module.exports = {
     adminRegisterBroker,
@@ -796,5 +833,6 @@ module.exports = {
     AsignBroker,
     adminAssignBrokertoPublic,
     getBrokertoBroker,
-    adminAssignBrokertoBroker
+    adminAssignBrokertoBroker,
+    brokerImageAllowPU
 }

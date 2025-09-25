@@ -5,7 +5,7 @@ const { protect } = require('../../middleware/authMiddleware')
 const { updateImageName,uploadProfileImage,multerFile,getProfileImageUrl,
     removeProfileImage,uploadBrokerImage ,getBrokerUserProfileImageUrl,getPUImageUrl,
     getBrokerUserProfileViewedImageUrl,getBrokImageUrl, uploadPUProfileImage,getPUProfileImageURL, getPUProfileViewedImageURL,
-PURemoveProfileImage,PUProfileImageUrl,getBrokerProfileImageUrl} = require('../../azureservice/fileUploadService')
+PURemoveProfileImage,PUProfileImageUrl,getBrokerProfileImageUrl,brokerImageUrl} = require('../../azureservice/fileUploadService')
    
 //const { getAllStates } = require('../controllers/masterDataController')
 
@@ -26,6 +26,7 @@ router.route('/getPUProfileViewedImageURL').post(protect,levelTwoRateLimit, getP
 router.route('/PURemoveProfileImage').post(protect,levelOneRateLimit, PURemoveProfileImage)
 router.route('/PUProfileImageUrl').post(protect,levelThreeRateLimit,PUProfileImageUrl)
 router.route('/getBrokerProfileImageUrl').post(protect,levelThreeRateLimit,getBrokerProfileImageUrl)
+router.route('/brokerImageUrl').post(protect,levelThreeRateLimit,brokerImageUrl)
 
 
 
