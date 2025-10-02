@@ -10,9 +10,26 @@ const bodyParser = require('body-parser');
 const { protect } = require('./middleware/authMiddleware')
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
+const { SecretClient } = require('@azure/keyvault-secrets');
+const { DefaultAzureCredential } = require('@azure/identity');
+const { GoogleAuth } = require('google-auth-library');
+
 
 const path = require('path');
 process.env.GOOGLE_APPLICATION_CREDENTIALS = path.join(__dirname, 'config', 'utthira-1732172606054-54be0538d4f7.json');
+
+
+const credential = new DefaultAzureCredential(); // make sure your app or dev environment is authenticated
+const vaultName = "utthirasecrete"; // Just the name, not full URL
+const vaultUrl = `https://${vaultName}.vault.azure.net`; // ✅ Correct base URL
+
+
+
+
+
+
+const client = new SecretClient(vaultUrl, credential);
+
 
 //console.log('creddd')
 //console.log(credentials)
@@ -24,7 +41,15 @@ app.disable('x-powered-by');
 
 
 async function authenticate() {
+
+    
+
+
   const credentials = JSON.parse(process.env.GOOGLE_CREDENTIALS_JSON);
+
+   if(process.env.IS_AZURE == "false")
+   {
+    console.log('Captcha test..')
   const auth = new google.auth.GoogleAuth({
    credentials,
     scopes: 'https://www.googleapis.com/auth/cloud-platform',
@@ -32,6 +57,26 @@ async function authenticate() {
   
   const authClient = await auth.getClient();
   console.log('Authenticated successfully');
+   }
+   else
+   {
+    console.log('Captcha test123..')
+    const secretName = "UtthiraCaptchaAccount";
+    const secret = await client.getSecret(secretName);
+    const serviceAccount = JSON.parse(secret.value);
+    //const rawPrivateKey = serviceAccount.private_key.replace(/\\n/g, '\n');
+
+
+    const auth = new GoogleAuth({
+      credentials: serviceAccount,
+      scopes: ['https://www.googleapis.com/auth/cloud-platform'],
+    });
+   const googleClient  = await auth.getClient();
+
+   const projectId = await auth.getProjectId();
+   console.log(`Authenticated for project: ${projectId}`);
+
+   }
 }
 
 authenticate().catch((err) => console.error('Authentication failed:', err));
